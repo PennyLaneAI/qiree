@@ -33,8 +33,8 @@ class LightningQuantum final : virtual public QuantumNotImpl
     LightningQuantum(std::ostream& os, unsigned long int seed);
     ~LightningQuantum();
 
-    QIREE_DELETE_COPY_MOVE(LightningQuantum);  // Delete copy and move constructors
-
+    QIREE_DELETE_COPY_MOVE(LightningQuantum);  // Delete copy and move
+                                               // constructors
 
     //!@{
     //! \name Accessors
@@ -62,11 +62,10 @@ class LightningQuantum final : virtual public QuantumNotImpl
     QState read_result(Result) const final;
     //!@}
 
-
     //!@{
     //! \name Circuit construction
     // void ccx(Qubit, Qubit) final;
-    void ccnot(Qubit, Qubit, Qubit); 
+    void ccnot(Qubit, Qubit, Qubit);
     void cnot(Qubit, Qubit) final;
     void cx(Qubit, Qubit) final;
     // void cy(Qubit, Qubit) final;
@@ -92,7 +91,7 @@ class LightningQuantum final : virtual public QuantumNotImpl
 
     struct Factory;
     struct State;
-  
+
     //// DATA ////
 
     std::ostream& output_;

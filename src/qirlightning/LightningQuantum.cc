@@ -11,11 +11,11 @@
 #include <algorithm>
 #include <iostream>
 #include <optional>
+#include <random>
 #include <stdexcept>
 #include <thread>
 #include <utility>
 #include <dlfcn.h>
-#include <random>
 
 #include "qiree/Assert.hh"
 
@@ -29,7 +29,8 @@ using namespace Catalyst::Runtime;
 /*!
  * Initialize the Lightning simulator
  */
-LightningQuantum::LightningQuantum(std::ostream& os, unsigned long int seed) : output_(os), seed_(seed)
+LightningQuantum::LightningQuantum(std::ostream& os, unsigned long int seed)
+    : output_(os), seed_(seed)
 {
     std::string rtd_lib = RTDLIB;
     std::string rtd_device = RTDDEVICE;
@@ -56,8 +57,8 @@ LightningQuantum::LightningQuantum(std::ostream& os, unsigned long int seed) : o
 
 //---------------------------------------------------------------------------//
 //! Default destructor
-LightningQuantum::~LightningQuantum() {
-
+LightningQuantum::~LightningQuantum()
+{
     if (rtd_dylib_handler)
     {
         dlclose(rtd_dylib_handler);
@@ -87,10 +88,7 @@ void LightningQuantum::set_up(EntryPointAttrs const& attrs)
 /*!
  * Complete an execution
  */
-void LightningQuantum::tear_down()
-{
-  
-}
+void LightningQuantum::tear_down() {}
 
 //---------------------------------------------------------------------------//
 /*!
@@ -103,7 +101,7 @@ void LightningQuantum::reset(Qubit q)
 
 //----------------------------------------------------------------------------//
 /*!
- * Read the value of a result. 
+ * Read the value of a result.
  */
 QState LightningQuantum::read_result(Result r) const
 {
@@ -117,13 +115,14 @@ QState LightningQuantum::read_result(Result r) const
  * Map a qubit to a result index.
  */
 void LightningQuantum::mz(Qubit q, Result r)
-{ 
-    QIREE_EXPECT(q.value < this->num_qubits());  
+{
+    QIREE_EXPECT(q.value < this->num_qubits());
     QIREE_EXPECT(r.value < this->num_results());
     std::mt19937 gen(seed_);
     seed_++;
     rtd_qdevice->SetDevicePRNG(&gen);
-    auto result = rtd_qdevice->Measure(static_cast<intptr_t>(q.value), std::nullopt);
+    auto result
+        = rtd_qdevice->Measure(static_cast<intptr_t>(q.value), std::nullopt);
     results_[r.value] = *result;
 }
 
@@ -136,22 +135,29 @@ void LightningQuantum::mz(Qubit q, Result r)
 void LightningQuantum::cx(Qubit q1, Qubit q2)
 {
     rtd_qdevice->NamedOperation(
-        "CNOT", {}, {static_cast<intptr_t>(q1.value), static_cast<intptr_t>(q2.value)});
+        "CNOT",
+        {},
+        {static_cast<intptr_t>(q1.value), static_cast<intptr_t>(q2.value)});
 }
 void LightningQuantum::cnot(Qubit q1, Qubit q2)
 {
     rtd_qdevice->NamedOperation(
-        "CNOT", {}, {static_cast<intptr_t>(q1.value), static_cast<intptr_t>(q2.value)});
+        "CNOT",
+        {},
+        {static_cast<intptr_t>(q1.value), static_cast<intptr_t>(q2.value)});
 }
 void LightningQuantum::cz(Qubit q1, Qubit q2)
 {
     rtd_qdevice->NamedOperation(
-        "CZ", {}, {static_cast<intptr_t>(q1.value), static_cast<intptr_t>(q2.value)});
+        "CZ",
+        {},
+        {static_cast<intptr_t>(q1.value), static_cast<intptr_t>(q2.value)});
 }
 // 2. Local gates
 void LightningQuantum::h(Qubit q)
 {
-    rtd_qdevice->NamedOperation("Hadamard", {}, {static_cast<intptr_t>(q.value)});
+    rtd_qdevice->NamedOperation(
+        "Hadamard", {}, {static_cast<intptr_t>(q.value)});
 }
 void LightningQuantum::s(Qubit q)
 {
@@ -177,15 +183,18 @@ void LightningQuantum::z(Qubit q)
 // 2.2 rotation gates
 void LightningQuantum::rx(double theta, Qubit q)
 {
-    rtd_qdevice->NamedOperation("RX", {theta}, {static_cast<intptr_t>(q.value)});
+    rtd_qdevice->NamedOperation(
+        "RX", {theta}, {static_cast<intptr_t>(q.value)});
 }
 void LightningQuantum::ry(double theta, Qubit q)
 {
-    rtd_qdevice->NamedOperation("RY", {theta}, {static_cast<intptr_t>(q.value)});
+    rtd_qdevice->NamedOperation(
+        "RY", {theta}, {static_cast<intptr_t>(q.value)});
 }
 void LightningQuantum::rz(double theta, Qubit q)
 {
-    rtd_qdevice->NamedOperation("RZ", {theta}, {static_cast<intptr_t>(q.value)});
+    rtd_qdevice->NamedOperation(
+        "RZ", {theta}, {static_cast<intptr_t>(q.value)});
 }
 
 }  // namespace qiree

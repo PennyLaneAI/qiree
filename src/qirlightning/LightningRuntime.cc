@@ -18,7 +18,8 @@ namespace qiree
 /*!
  * Construct with quantum reference to access classical registers.
  */
-LightningRuntime::LightningRuntime(std::ostream& output, LightningQuantum const& sim)
+LightningRuntime::LightningRuntime(std::ostream& output,
+                                   LightningQuantum const& sim)
     : SingleResultRuntime{sim}, output_(output)
 {
 }
