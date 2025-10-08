@@ -7,7 +7,7 @@ The [PennyLane-Lightning](https://github.com/PennyLaneAI/pennylane-lightning) pl
 
 ## Installing a Lightning simulator
 
-More information on installing Pennylane Lightning simulators from source, please visit the [Lightning installation page](https://docs.pennylane.ai/projects/lightning/en/latest/dev/installation.html). Note: QIREE is tested to work with PennyLane Lightning simulators v0.42.
+For more information on installing Pennylane Lightning simulators from source, please visit the [Lightning installation page](https://docs.pennylane.ai/projects/lightning/en/latest/dev/installation.html). Note: QIREE is tested to work with PennyLane Lightning simulators v0.42.
 
 ### Quick start
 
@@ -27,7 +27,12 @@ License: Apache License 2.0
 Location: <site packages path>
 Requires: pennylane, pennylane-lightning
 ```
-Running `pip install pennylane` or `pip install pennylane-lightning` will automatically install the `lightning.qubit` (CPU) simulator, and other simulators can be installed by running `pip install pennylane-lightning-kokkos / pennylane-lightning-gpu`. Note: by default, the pre-built `lightning.kokkos` wheels from pip are built with Kokkos OpenMP enabled for CPU. To build Kokkos for other devices (e.g. CUDA or HIP GPUs), please install from source. Instruction can be found [here](https://docs.pennylane.ai/projects/lightning/en/latest/lightning_kokkos/installation.html).
+
+**Note:** PennyLane and PennyLane lightning supports Python 3.11-3.13.
+
+Running `pip install pennylane` or `pip install pennylane-lightning` will automatically install the `lightning.qubit` (CPU) simulator, and other simulators can be installed by running `pip install pennylane-lightning-kokkos / pennylane-lightning-gpu`.
+
+**Note:** By default, the pre-built `lightning.kokkos` wheels from pip are built with Kokkos OpenMP enabled for CPU. To build Kokkos for other devices (e.g. CUDA or HIP GPUs), please install from source. Instruction can be found [here](https://docs.pennylane.ai/projects/lightning/en/latest/lightning_kokkos/installation.html).
 
 When installing Pennylane-Lightning from pip or from source, you will have the shared libraries for each of the simulator installed. These are named `liblightning_qubit_catalyst.so`/`liblightning_kokkos_catalyst.so`/`liblightning_GPU_catalyst.so` respectively.
 
@@ -38,8 +43,6 @@ $ export PL_PATH=$(python -c "import site; print( f'{site.getsitepackages()[0]}/
 $ ls $PL_PATH
 ... liblightning_qubit_catalyst.so  liblightning_kokkos_catalyst.so ...
 ```
-
-You can swap `pennylane-lightning-kokkos` for `pennylane-lightning-gpu` for lightning.gpu and `pennylane-lightning` for lightning.gpu simulators.
 
 ## Compile QIR-EE with Lightning backend
 
@@ -57,12 +60,12 @@ make
 
 ```
 
-Note:
+**Note:**
 - replace `libligghtning_kokkos_catalyst.so` with `liblightning_qubit_catalyst.so` or `liblightning_GPU_catalyst.so` if required.
 - when running with `lightning.gpu` simulator for Nvidia GPUs, include `cuquantum` libraries in the library path (which will be installed as a dependency from Python), i.e.
 
 ```
-LD_LIBRARY_PATH=$(python -c "import site; print( f'{site.getsitepackages()[0]}/cuquantum')")/lib:$LD_LIBRARY_PATH ./test_rt_device.out
+export LD_LIBRARY_PATH=$(python -c "import site; print( f'{site.getsitepackages()[0]}/cuquantum')")/lib:$LD_LIBRARY_PATH
 ```
 
 
