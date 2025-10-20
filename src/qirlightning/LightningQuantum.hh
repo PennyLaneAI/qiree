@@ -96,9 +96,9 @@ class LightningQuantum final : virtual public QuantumNotImpl
 
     std::ostream& output_;
     unsigned long int seed_{};
-    void* rtd_dylib_handler;
-    void* factory_f_ptr;
-    std::unique_ptr<Catalyst::Runtime::QuantumDevice> rtd_qdevice;
+    void* rtd_dylib_handler_;
+    void* factory_f_ptr_;
+    std::unique_ptr<Catalyst::Runtime::QuantumDevice> rtd_qdevice_;
     std::vector<bool> results_;
 
     size_type num_qubits_{};

@@ -32,37 +32,31 @@ using namespace Catalyst::Runtime;
 LightningQuantum::LightningQuantum(std::ostream& os, unsigned long int seed)
     : output_(os), seed_(seed)
 {
-    std::string rtd_lib = RTDLIB;
-    std::string rtd_device = RTDDEVICE;
-    std::string kwargs = {};
     auto rtld_flags = RTLD_LAZY | RTLD_NODELETE;
-    rtd_dylib_handler = dlopen(rtd_lib.c_str(), rtld_flags);
+    rtd_dylib_handler_ = dlopen(RTDLIB, rtld_flags);
 
-    if (!rtd_dylib_handler)
-    {
-        throw std::runtime_error("Failed to load library: " + rtd_lib);
-    }
+    QIREE_VALIDATE(rtd_dylib_handler_,
+                   << "failed to load Lightning runtime library '" << RTDLIB
+                   << "'");
 
     // Find device factory
+    std::string rtd_device = RTDDEVICE;
     std::string factory_name = rtd_device + "Factory";
-    factory_f_ptr = dlsym(rtd_dylib_handler, factory_name.c_str());
+    factory_f_ptr_ = dlsym(rtd_dylib_handler_, factory_name.c_str());
 
-    if (!factory_f_ptr)
-    {
-        dlclose(rtd_dylib_handler);
-        throw std::runtime_error("Failed to find factory function: "
-                                 + factory_name);
-    }
+    QIREE_VALIDATE(factory_f_ptr_,
+                   << "failed to find device factory function '"
+                   << factory_name << "'");
 }
 
 //---------------------------------------------------------------------------//
 //! Default destructor
 LightningQuantum::~LightningQuantum()
 {
-    if (rtd_dylib_handler)
+    if (rtd_dylib_handler_)
     {
-        dlclose(rtd_dylib_handler);
-    };
+        dlclose(rtd_dylib_handler_);
+    }
 };
 
 //---------------------------------------------------------------------------//
@@ -77,11 +71,11 @@ void LightningQuantum::set_up(EntryPointAttrs const& attrs)
     results_.resize(attrs.required_num_results);
 
     std::string rtd_kwargs = {};
-    rtd_qdevice = std::unique_ptr<QuantumDevice>(
-        reinterpret_cast<decltype(GenericDeviceFactory)*>(factory_f_ptr)(
+    rtd_qdevice_ = std::unique_ptr<QuantumDevice>(
+        reinterpret_cast<decltype(GenericDeviceFactory)*>(factory_f_ptr_)(
             rtd_kwargs.c_str()));
 
-    rtd_qdevice->AllocateQubits(num_qubits_);
+    rtd_qdevice_->AllocateQubits(num_qubits_);
 }
 
 //---------------------------------------------------------------------------//
@@ -120,9 +114,9 @@ void LightningQuantum::mz(Qubit q, Result r)
     QIREE_EXPECT(r.value < this->num_results());
     std::mt19937 gen(seed_);
     seed_++;
-    rtd_qdevice->SetDevicePRNG(&gen);
+    rtd_qdevice_->SetDevicePRNG(&gen);
     auto result
-        = rtd_qdevice->Measure(static_cast<intptr_t>(q.value), std::nullopt);
+        = rtd_qdevice_->Measure(static_cast<intptr_t>(q.value), std::nullopt);
     results_[r.value] = *result;
 }
 
@@ -134,21 +128,21 @@ void LightningQuantum::mz(Qubit q, Result r)
 // 1. Entangling gates
 void LightningQuantum::cx(Qubit q1, Qubit q2)
 {
-    rtd_qdevice->NamedOperation(
+    rtd_qdevice_->NamedOperation(
         "CNOT",
         {},
         {static_cast<intptr_t>(q1.value), static_cast<intptr_t>(q2.value)});
 }
 void LightningQuantum::cnot(Qubit q1, Qubit q2)
 {
-    rtd_qdevice->NamedOperation(
+    rtd_qdevice_->NamedOperation(
         "CNOT",
         {},
         {static_cast<intptr_t>(q1.value), static_cast<intptr_t>(q2.value)});
 }
 void LightningQuantum::cz(Qubit q1, Qubit q2)
 {
-    rtd_qdevice->NamedOperation(
+    rtd_qdevice_->NamedOperation(
         "CZ",
         {},
         {static_cast<intptr_t>(q1.value), static_cast<intptr_t>(q2.value)});
@@ -156,44 +150,47 @@ void LightningQuantum::cz(Qubit q1, Qubit q2)
 // 2. Local gates
 void LightningQuantum::h(Qubit q)
 {
-    rtd_qdevice->NamedOperation(
+    rtd_qdevice_->NamedOperation(
         "Hadamard", {}, {static_cast<intptr_t>(q.value)});
 }
 void LightningQuantum::s(Qubit q)
 {
-    rtd_qdevice->NamedOperation("S", {}, {static_cast<intptr_t>(q.value)});
+    rtd_qdevice_->NamedOperation("S", {}, {static_cast<intptr_t>(q.value)});
 }
 void LightningQuantum::t(Qubit q)
 {
-    rtd_qdevice->NamedOperation("T", {}, {static_cast<intptr_t>(q.value)});
+    rtd_qdevice_->NamedOperation("T", {}, {static_cast<intptr_t>(q.value)});
 }
 // 2.1 Pauli gates
 void LightningQuantum::x(Qubit q)
 {
-    rtd_qdevice->NamedOperation("PauliX", {}, {static_cast<intptr_t>(q.value)});
+    rtd_qdevice_->NamedOperation(
+        "PauliX", {}, {static_cast<intptr_t>(q.value)});
 }
 void LightningQuantum::y(Qubit q)
 {
-    rtd_qdevice->NamedOperation("PauliY", {}, {static_cast<intptr_t>(q.value)});
+    rtd_qdevice_->NamedOperation(
+        "PauliY", {}, {static_cast<intptr_t>(q.value)});
 }
 void LightningQuantum::z(Qubit q)
 {
-    rtd_qdevice->NamedOperation("PauliZ", {}, {static_cast<intptr_t>(q.value)});
+    rtd_qdevice_->NamedOperation(
+        "PauliZ", {}, {static_cast<intptr_t>(q.value)});
 }
 // 2.2 rotation gates
 void LightningQuantum::rx(double theta, Qubit q)
 {
-    rtd_qdevice->NamedOperation(
+    rtd_qdevice_->NamedOperation(
         "RX", {theta}, {static_cast<intptr_t>(q.value)});
 }
 void LightningQuantum::ry(double theta, Qubit q)
 {
-    rtd_qdevice->NamedOperation(
+    rtd_qdevice_->NamedOperation(
         "RY", {theta}, {static_cast<intptr_t>(q.value)});
 }
 void LightningQuantum::rz(double theta, Qubit q)
 {
-    rtd_qdevice->NamedOperation(
+    rtd_qdevice_->NamedOperation(
         "RZ", {theta}, {static_cast<intptr_t>(q.value)});
 }
 
