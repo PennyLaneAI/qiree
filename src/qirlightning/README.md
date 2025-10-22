@@ -7,18 +7,20 @@ The [PennyLane-Lightning](https://github.com/PennyLaneAI/pennylane-lightning) pl
 
 ## Installing a Lightning simulator
 
-For more information on installing Pennylane Lightning simulators from source, please visit the [Lightning installation page](https://docs.pennylane.ai/projects/lightning/en/latest/dev/installation.html). Note: QIREE is tested to work with PennyLane Lightning simulators v0.42.
+For more information on installing Pennylane Lightning simulators from source, please visit the [Lightning installation page](https://docs.pennylane.ai/projects/lightning/en/latest/dev/installation.html).
+
+**Note:** QIREE is tested to work with PennyLane Lightning simulators v0.43.
 
 ### Quick start
 
 The easiest way to get started is to install a Lightning simulator (`pennylane-lightning`/`pennylane-lightning-gpu`/`pennylane-lightning-kokkos`) from PyPI via pip:
 
 ```
-$ pip install pennylane-lightning-kokkos==0.42.0
+$ pip install pennylane-lightning-kokkos==0.43.0
 
 $ pip show pennylane-lightning-kokkos
 Name: PennyLane_Lightning_Kokkos
-Version: 0.42.0
+Version: 0.43.0
 Summary: PennyLane-Lightning plugin
 Home-page: https://github.com/PennyLaneAI/pennylane-lightning
 Author:
@@ -44,24 +46,31 @@ $ ls $PL_PATH
 ... liblightning_qubit_catalyst.so  liblightning_kokkos_catalyst.so ...
 ```
 
+The helper script `qiree/scripts/lightning-path.sh <device>` can be used to obtain the absolute path of the shared library.
+
 ## Compile QIR-EE with Lightning backend
 
 To compile QIR-EE with lightning backend:
 
 ```
-# Set the path for the lightning simulator shared library
-export LIGHTNING_SIM_PATH=$(python -c "import site; print( f'{site.getsitepackages()[0]}/pennylane_lightning')")/liblightning_kokkos_catalyst.so
-
-# Proceed with usual build instructions, but with `-DQIREE_USE_LIGHTNING=ON` cmake flag
 cd qiree/
+
+# Set the path for the lightning simulator shared library using the
+# helper script. Update <device> to qubit / gpu / kokkos as required.
+
+export LIGHTNING_SIM_PATH=$(bash ./scripts/lightning-path.sh <device>)
+
+# Proceed with usual build instructions
+# but with the extra `-DQIREE_USE_LIGHTNING=ON` and
+# `-DQIREE_LIGHTNING_SIM_PATH` cmake flags
+
 mkdir build; cd build
-cmake -DQIREE_USE_LIGHTNING=ON ..
+cmake -DQIREE_USE_LIGHTNING=ON -DQIREE_LIGHTNING_SIM_PATH=$LIGHTNING_SIM_PATH ..
 make
 
 ```
 
 **Note:**
-- replace `libligghtning_kokkos_catalyst.so` with `liblightning_qubit_catalyst.so` or `liblightning_GPU_catalyst.so` if required.
 - when running with `lightning.gpu` simulator for Nvidia GPUs, include `cuquantum` libraries in the library path (which will be installed as a dependency from Python), i.e.
 
 ```

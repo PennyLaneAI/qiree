@@ -33,20 +33,30 @@ LightningQuantum::LightningQuantum(std::ostream& os, unsigned long int seed)
     : output_(os), seed_(seed)
 {
     auto rtld_flags = RTLD_LAZY | RTLD_NODELETE;
-    rtd_dylib_handler_ = dlopen(RTDLIB, rtld_flags);
+    rtd_dylib_handler_ = dlopen(QIREE_LIGHTNING_RTDLIB, rtld_flags);
 
     QIREE_VALIDATE(rtd_dylib_handler_,
-                   << "failed to load Lightning runtime library '" << RTDLIB
-                   << "'");
+                   << "failed to load Lightning runtime library '"
+                   << QIREE_LIGHTNING_RTDLIB << "'");
 
     // Find device factory
-    std::string rtd_device = RTDDEVICE;
-    std::string factory_name = rtd_device + "Factory";
-    factory_f_ptr_ = dlsym(rtd_dylib_handler_, factory_name.c_str());
+    std::vector<std::string> const factory_names
+        = {"LightningSimulatorFactory",
+           "LightningKokkosSimulatorFactory",
+           "LightningGPUSimulatorFactory"};
+
+    for (auto const& factory_name : factory_names)
+    {
+        dlerror();
+        factory_f_ptr_ = dlsym(rtd_dylib_handler_, factory_name.c_str());
+        if (factory_f_ptr_)
+        {
+            break;
+        }
+    }
 
     QIREE_VALIDATE(factory_f_ptr_,
-                   << "failed to find device factory function '"
-                   << factory_name << "'");
+                   << "failed to find valid device factory function");
 }
 
 //---------------------------------------------------------------------------//
