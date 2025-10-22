@@ -36,8 +36,8 @@ macro(FindCatalyst target_name)
 
     # Fetching /lib/backend/common hpp headers
     set(LIB_BACKEND_COMMON_HEADERS  CacheManager.hpp
-                    QubitManager.hpp
-                    Utils.hpp
+                                    QubitManager.hpp
+                                    Utils.hpp
     )
 
     foreach(HEADER ${LIB_BACKEND_COMMON_HEADERS})
@@ -54,10 +54,10 @@ macro(FindCatalyst target_name)
 
     # Fetching include hpp headers
     set(INCLUDE_HEADERS DataView.hpp
-              Exception.hpp
-              QuantumDevice.hpp
-              RuntimeCAPI.h
-              Types.h
+                        Exception.hpp
+                        QuantumDevice.hpp
+                        RuntimeCAPI.h
+                        Types.h
     )
 
     foreach(HEADER ${INCLUDE_HEADERS})
